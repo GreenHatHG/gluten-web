@@ -15,7 +15,7 @@
 <script>
   import gluten from '@/views/user/components/addGluten'
   export default {
-    comments: {gluten},
+    components: {gluten},
     data(){
       return{
         columns: [
@@ -39,7 +39,3 @@
     }
   }
 </script>
-
-<style scoped>
-
-</style>
