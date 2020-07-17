@@ -1,13 +1,12 @@
 <template>
   <el-dialog title="添加新数据"  :visible.sync="dialogVisible" width="45%">
-    <el-form ref="form" :model="form" label-width="50px">
-      <el-form-item label="面经" prop="content"
-        :rules="[{ required: true, message: '面经不能为空'}]" >
+    <el-form ref="form" :model="form" label-width="50px" :rules="rules">
+      <el-form-item label="面经" prop="content">
         <el-input v-model="form.content" clearable ></el-input>
       </el-form-item>
       <el-form-item label="分类">
         <el-select
-          v-model="form.category"
+          v-model="newForm.category"
           multiple
           filterable
           allow-create
@@ -22,7 +21,7 @@
       </el-form-item>
       <el-form-item label="岗位">
         <el-select
-          v-model="form.post"
+          v-model="newForm.post"
           multiple
           filterable
           allow-create
@@ -37,7 +36,7 @@
       </el-form-item>
       <el-form-item label="公司">
         <el-select
-          v-model="form.company"
+          v-model="newForm.company"
           multiple
           filterable
           allow-create
@@ -60,6 +59,7 @@
 
 <script>
   import { getUserCategory } from '@/api/user-category/get'
+  import { addGluten } from '@/api/gluten/addGluten'
 
   export default {
     data(){
@@ -70,6 +70,16 @@
           category: [],
           post: [],
           company: []
+        },
+        newForm:{
+          category: [],
+          post: [],
+          company: []
+        },
+        rules: {
+          content: [
+            { required: true, message: '面经不能为空', trigger: 'blur' }
+          ]
         }
       }
     },
@@ -78,7 +88,21 @@
         this.dialogVisible = true
       },
       onSubmit(){
-        console.log(this.form)
+        addGluten({
+          //数组合并去重，用户可能添加了新的项目，得传给后端更新（数组转成字符串）
+          category: Array.from(new Set([this.form.category, this.newForm.category])).join(","),
+          post: Array.from(new Set([this.form.post, this.newForm.post])).join(","),
+          company: Array.from(new Set([this.form.company, this.newForm.company])).join(","),
+          contentCategory: this.newForm.category,
+          contentPost: this.newForm.post,
+          contentCompany: this.newForm.company,
+          content: this.form.content
+        }).then(res => {
+          this.$message.success("添加成功")
+          this.close()
+        }).catch(err =>{
+          this.$message.error("添加失败，请稍后再试")
+        })
       },
       close(){
         this.dialogVisible = false
@@ -90,25 +114,30 @@
         const post = res.post
         const company = res.company
         for (const item of category) {
-          this.form.category.push({
-            value: item,
-            label: item
-          })
+          if (item !== ''){
+            this.form.category.push({
+              value: item,
+              label: item
+            })
+          }
         }
         for (const item of post) {
-          this.form.post.push({
-            value: item,
-            label: item
-          })
+          if (item !== ''){
+            this.form.post.push({
+              value: item,
+              label: item
+            })
+          }
         }
         for (const item of company) {
-          this.form.company.push({
-            value: item,
-            label: item
-          })
+          if (item !== ''){
+            this.form.company.push({
+              value: item,
+              label: item
+            })
+          }
         }
       })
-
     }
   }
 </script>
