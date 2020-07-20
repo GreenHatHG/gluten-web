@@ -19,6 +19,7 @@
           @contextmenu.native="handleContextmenu">
           <el-tab-pane
             v-for="page in opened"
+            v-if="page.meta.title"
             :key="page.fullPath"
             :label="page.meta.title || '未命名'"
             :name="page.fullPath"
@@ -79,7 +80,8 @@ export default {
         { icon: 'times', title: '关闭其它', value: 'other' },
         { icon: 'times-circle', title: '关闭全部', value: 'all' }
       ],
-      tagName: '/index'
+      tagName: '/index',
+      newOpened: []
     }
   },
   computed: {

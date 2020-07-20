@@ -65,6 +65,12 @@
     data(){
       return{
         dialogVisible: false,
+        //保存原始信息
+        tempForm:{
+          category: [],
+          post: [],
+          company: []
+        },
         form:{
           content: '',
           category: [],
@@ -90,15 +96,24 @@
       onSubmit(){
         addGluten({
           //数组合并去重，用户可能添加了新的项目，得传给后端更新（数组转成字符串）
-          category: Array.from(new Set([this.form.category, this.newForm.category])).join(","),
-          post: Array.from(new Set([this.form.post, this.newForm.post])).join(","),
-          company: Array.from(new Set([this.form.company, this.newForm.company])).join(","),
+          category: Array.from(new Set(this.newForm.category.concat(this.tempForm.category))),
+          post: Array.from(new Set(this.newForm.post.concat(this.tempForm.post))),
+          company: Array.from(new Set(this.newForm.company.concat(this.tempForm.company))),
           contentCategory: this.newForm.category,
           contentPost: this.newForm.post,
           contentCompany: this.newForm.company,
           content: this.form.content
         }).then(res => {
           this.$message.success("添加成功")
+          this.newForm.category = []
+          this.newForm.company = []
+          this.newForm.post = []
+          this.form.category = []
+          this.form.company = []
+          this.form.post = []
+          this.form.content = ""
+          this.$bus.$emit('selectAllGlutenInfoById')
+          this.updateUserCategory()
           this.close()
         }).catch(err =>{
           this.$message.error("添加失败，请稍后再试")
@@ -107,37 +122,40 @@
       close(){
         this.dialogVisible = false
       },
+      updateUserCategory(){
+        getUserCategory().then(res =>{
+          this.tempForm.category = res.category || []
+          this.tempForm.post = res.post || []
+          this.tempForm.company = res.company || []
+          for (const item of this.tempForm.category) {
+            if (item !== ''){
+              this.form.category.push({
+                value: item,
+                label: item
+              })
+            }
+          }
+          for (const item of this.tempForm.post) {
+            if (item !== ''){
+              this.form.post.push({
+                value: item,
+                label: item
+              })
+            }
+          }
+          for (const item of this.tempForm.company) {
+            if (item !== ''){
+              this.form.company.push({
+                value: item,
+                label: item
+              })
+            }
+          }
+        })
+      }
     },
     mounted () {
-      getUserCategory().then(res =>{
-        const category = res.category
-        const post = res.post
-        const company = res.company
-        for (const item of category) {
-          if (item !== ''){
-            this.form.category.push({
-              value: item,
-              label: item
-            })
-          }
-        }
-        for (const item of post) {
-          if (item !== ''){
-            this.form.post.push({
-              value: item,
-              label: item
-            })
-          }
-        }
-        for (const item of company) {
-          if (item !== ''){
-            this.form.company.push({
-              value: item,
-              label: item
-            })
-          }
-        }
-      })
+      this.updateUserCategory()
     }
   }
 </script>

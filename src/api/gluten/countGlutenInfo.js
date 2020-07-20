@@ -1,8 +1,8 @@
 import { request } from '@/api/service'
 
-export function selectAllGlutenInfoById() {
+export function countGlutenInfo() {
   return request({
-    url: '/gluten_info',
+    url: '/gluten_info/count',
     method: 'get',
   })
 }

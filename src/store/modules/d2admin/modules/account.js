@@ -1,9 +1,9 @@
 import { Message, MessageBox } from 'element-ui'
 import util from '@/libs/util.js'
 import router from '@/router'
-import api from '@/api'
 
 export default {
+
   namespaced: true,
   actions: {
     /**
@@ -47,6 +47,7 @@ export default {
         // 删除cookie
         util.cookies.remove('token')
         util.cookies.remove('uuid')
+        dispatch('d2admin/page/closeAll', {}, {root: true})
         // 清空 vuex 用户信息
         await dispatch('d2admin/user/set', {}, { root: true })
         // 跳转路由

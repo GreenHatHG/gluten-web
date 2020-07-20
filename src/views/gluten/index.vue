@@ -14,6 +14,8 @@
 <script>
   import { mapActions, mapState } from 'vuex'
   import { loginWithGithub } from '@/api/login/github'
+  import { get } from 'lodash'
+  import setting from '@/setting'
 
   export default {
     data(){
@@ -42,7 +44,7 @@
       ]),
     },
     mounted () {
-      if(typeof(this.$route.query.code) !== undefined && typeof(this.info.name) === 'undefined'){
+      if(typeof(this.$route.query.code) !== undefined && (typeof(this.info.name) === 'undefined' || this.info.name === '')){
         loginWithGithub({code: this.$route.query.code}).then(res =>{
           this.login({
             id:res.id,
@@ -50,8 +52,7 @@
             token:res.token,
             avatarUrl:res.avatarUrl
           })
-          //清除地址栏参数
-          // this.$router.push("index")
+          this.$router.push("index")
         })
       }
     }

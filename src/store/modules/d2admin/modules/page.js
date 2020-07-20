@@ -6,6 +6,7 @@ import setting from '@/setting.js'
 const isKeepAlive = data => get(data, 'meta.cache', false)
 
 export default {
+
   namespaced: true,
   state: {
     // 可以在多页 tab 模式下显示的页面
