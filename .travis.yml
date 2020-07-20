@@ -19,7 +19,7 @@ script:
   - npm install
   - npm run build
   - sshpass -p ${gluten_pwd} ssh -o StrictHostKeyChecking=no root@${gluten_ip}  'rm -rf /root/gluten/dist'
-  - sshpass -p ${gluten_pwd} scp -o StrictHostKeyChecking=no ./dist root@${gluten_ip}:/root/gluten/dist
+  - sshpass -p ${gluten_pwd} scp -o StrictHostKeyChecking=no -r ./dist root@${gluten_ip}:/root/gluten/dist
   - sshpass -p ${gluten_pwd} ssh -o StrictHostKeyChecking=no root@${gluten_ip}  'systemctl restart caddy'
 
 branches:
