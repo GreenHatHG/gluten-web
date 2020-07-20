@@ -1,8 +1,26 @@
 <template>
   <d2-container>
     <template slot="header">
-      <el-button slot="header" @click="addRow">新增</el-button>
-      <el-button style="float:right;" icon="el-icon-search" circle></el-button>
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <el-button  @click="addRow">新增</el-button>
+        </el-col>
+        <el-col :span="6">
+          <el-dropdown>
+            <el-button>
+              筛选分类<i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item  @click.native="categoryFilter($event)">
+                所有
+              </el-dropdown-item>
+              <el-dropdown-item v-for="item in tempForm.category" @click.native="categoryFilter($event)">
+                {{item}}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </el-col>
+      </el-row>
     </template>
     <gluten ref="add"/>
     <editTitle ref="editTitleRef"/>
@@ -26,9 +44,10 @@
   import companyTag from '@/views/user/components/companyTag'
   import categoryTag from '@/views/user/components/categoryTag'
   import editTitle from '@/views/user/components/editTitle'
-  import { selectAllGlutenInfoById } from '@/api/gluten/selectAllGlutenInfoById'
+  import { selectAllGlutenInfoByIdOrCategory } from '@/api/gluten/selectAllGlutenInfoById'
   import { deleteGlutenByID } from '@/api/gluten/deleteGlutenByID'
   import { countGlutenInfo } from '@/api/gluten/countGlutenInfo'
+  import {getUserCategory} from "@/api/user-category/get";
   export default {
     components: {gluten, postTag, companyTag, categoryTag, editTitle, starTag},
     data(){
@@ -66,13 +85,25 @@
           currentPage: 1,
           pageSize: 6,
           total: 0
-        }
+        },
+        tempForm:{
+          category: [],
+          post: [],
+          company: []
+        },
+        form:{
+          category: [],
+          post: [],
+          company: []
+        },
+        //默认查询，还是按分类筛选
+        category: ""
       }
     },
     methods:{
       paginationCurrentChange (currentPage) {
         this.pagination.currentPage = currentPage
-        this.getGlutenData(currentPage, "")
+        this.getGlutenDataByIdOrCategory(currentPage, "", this.category)
       },
       deleteGluten({index, row}){
         deleteGlutenByID({
@@ -90,27 +121,81 @@
       addRow(){
         this.$refs.add.open()
       },
-      getGlutenData(currentPages, sort){
-        selectAllGlutenInfoById({
+      getGlutenDataByIdOrCategory(currentPages, sort, category){
+        selectAllGlutenInfoByIdOrCategory({
           "current_page": currentPages,
           "page_size": this.pagination.pageSize,
-          "sort": sort
+          "sort": sort,
+          "category" : category || ""
         }).then(res =>{
           this.data = res || []
         })
       },
       count(){
-        countGlutenInfo().then(res =>{
+        countGlutenInfo({
+          "category": this.category
+        }).then(res =>{
           this.pagination.total = res || 0
         })
+      },
+      updateUserCategory(){
+        getUserCategory().then(res =>{
+          this.tempForm.category = res.category || []
+          this.tempForm.post = res.post || []
+          this.tempForm.company = res.company || []
+          for (const item of this.tempForm.category) {
+            if (item !== ''){
+              this.form.category.push({
+                value: item,
+                label: item
+              })
+            }
+          }
+          for (const item of this.tempForm.post) {
+            if (item !== ''){
+              this.form.post.push({
+                value: item,
+                label: item
+              })
+            }
+          }
+          for (const item of this.tempForm.company) {
+            if (item !== ''){
+              this.form.company.push({
+                value: item,
+                label: item
+              })
+            }
+          }
+        }).finally(() =>{
+          this.$store.dispatch('d2admin/db/set', {
+            dbName: 'userCategory',
+            path: 'userCategory.data',
+            value: {
+              "tempForm": this.tempForm,
+              "form": this.form
+            },
+            user: true
+          })
+        })
+      },
+      categoryFilter(event){
+        //去掉前后空格
+        this.category = event.target.innerHTML.replace('<!---->','').replace(/(^\s*)|(\s*$)/g, "")
+        if (this.category === "所有"){
+          this.category = ""
+        }
+        this.count()
+        this.getGlutenDataByIdOrCategory(1, "", this.category)
       }
     },
     mounted () {
       this.$bus.$on('selectAllGlutenInfoById',()=>{
-        this.getGlutenData(1, "")
+        this.getGlutenDataByIdOrCategory(1, "", this.category)
         this.count()
       });
-      this.getGlutenData(1, "")
+      this.getGlutenDataByIdOrCategory(1, "", this.category)
+      this.updateUserCategory()
       this.count()
     }
   }

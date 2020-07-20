@@ -123,34 +123,19 @@
         this.dialogVisible = false
       },
       updateUserCategory(){
-        getUserCategory().then(res =>{
-          this.tempForm.category = res.category || []
-          this.tempForm.post = res.post || []
-          this.tempForm.company = res.company || []
-          for (const item of this.tempForm.category) {
-            if (item !== ''){
-              this.form.category.push({
-                value: item,
-                label: item
-              })
-            }
-          }
-          for (const item of this.tempForm.post) {
-            if (item !== ''){
-              this.form.post.push({
-                value: item,
-                label: item
-              })
-            }
-          }
-          for (const item of this.tempForm.company) {
-            if (item !== ''){
-              this.form.company.push({
-                value: item,
-                label: item
-              })
-            }
-          }
+        const value = this.$store.dispatch('d2admin/db/get', {
+          dbName: 'userCategory',
+          path: 'userCategory.data',
+          defaultValue: null,
+          user: true
+        })
+        value.then(res =>{
+          this.tempForm.category = res.tempForm.category || []
+          this.tempForm.post = res.tempForm.post || []
+          this.tempForm.company = res.tempForm.company || []
+          this.form.category = res.form.category || []
+          this.form.post = res.form.post || []
+          this.form.company = res.form.company || []
         })
       }
     },
