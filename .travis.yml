@@ -7,10 +7,16 @@ cache:
   directories:
     - node_modules
 
+addons:
+  apt:
+    packages:
+      - sshpass
+
 install:
-  - npm install
+  - ssh-keyscan ${gluten_ip} >> ~/.ssh/known_hosts
 
 script:
+  - npm install
   - npm run build
   - sshpass -p ${gluten_pwd} ssh -o StrictHostKeyChecking=no root@${gluten_ip}  'rm -rf /root/gluten/dist'
   - sshpass -p ${gluten_pwd} scp -o StrictHostKeyChecking=no ./dist root@${gluten_ip}:/root/gluten/dist
@@ -19,3 +25,6 @@ script:
 branches:
   only:
     - master
+
+notifications:
+  email: true
