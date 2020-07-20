@@ -2,6 +2,7 @@
   <d2-container>
     <template slot="header">
       <el-button slot="header" @click="addRow">新增</el-button>
+      <el-button style="float:right;" icon="el-icon-search" circle></el-button>
     </template>
     <gluten ref="add"/>
     <editTitle ref="editTitleRef"/>
@@ -63,7 +64,7 @@
         },
         pagination: {
           currentPage: 1,
-          pageSize: 5,
+          pageSize: 6,
           total: 0
         }
       }
