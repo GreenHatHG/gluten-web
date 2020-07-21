@@ -44,7 +44,15 @@
       ]),
     },
     mounted () {
-      if(typeof(this.$route.query.code) !== undefined && (typeof(this.info.name) === 'undefined' || this.info.name === '')){
+      console.log(this.$route.query.code)
+      console.log(this.info.name)
+      if(typeof(this.$route.query.code) !== 'undefined' && (typeof(this.info.name) === 'undefined' || this.info.name === '')){
+        const loading = this.$loading({
+          lock: true,
+          text: 'Loading',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
         loginWithGithub({code: this.$route.query.code}).then(res =>{
           this.login({
             id:res.id,
@@ -53,6 +61,10 @@
             avatarUrl:res.avatarUrl
           })
           this.$router.push("index")
+        }).catch(err =>{
+          this.$message.error("请稍后再试")
+        }).finally(() =>{
+          loading.close();
         })
       }
     }
